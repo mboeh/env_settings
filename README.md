@@ -31,7 +31,7 @@ app crashes again, find out what the value is supposed to be, and repeat.
 default_bcc = ENV.fetch('EMAIL_DEFAULT_BCC').split(/,/)
 Mailer.send_email(..., default_bcc: default_bcc)
 # somewhere else...
-alert_emails = ENV.fetch('ALERT_EMAILS').split(/\s*,\s*)
+alert_emails = ENV.fetch('ALERT_EMAILS').split(/\s*,\s*/)
 Mailer.send_email(..., to: alert_emails)
 ```
 
@@ -74,10 +74,10 @@ stuff a hash or JSON or something into an environment variable, you can use the
 Drop-in for ENV:
 
 ```ruby
-ENV_SETTINGS = EnvSettings.new do |e|
+ENV_SETTINGS = EnvSettings.extract do |e|
   e.string "SETTING_NAME"
   e.string "OTHER_SETTING_NAME", default: "good"
-end.extract(ENV)
+end
 
 # Replace ENV with ENV_SETTINGS in your code. If an unknown key is used, an
 # exception will be raised.
@@ -94,7 +94,7 @@ fake_env = {
   "FOO_IDEAS" => "good, bad, kinda okay",
   "FOO_POWER_LEVELS" => "1:2:4:8",
 }
-settings = EnvSettings.new do |e|
+settings = EnvSettings.extract(fake_env) do |e|
   e.string "FOO_NAME"
   e.string "FOO_EMAIL"
   # Settings are required by default unless a default value is provided.
@@ -106,6 +106,6 @@ settings = EnvSettings.new do |e|
   e.custom "FOO_POWER_LEVELS" do |v|
     v.nil? ? [] : v.split(":").map(&:to_i).sort
   end
-end.extract(fake_env)
+end
 ```
 
