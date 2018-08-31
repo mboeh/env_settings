@@ -4,16 +4,17 @@ module EnvSettings
   MissingSettingError = Class.new(StandardError)
   UnknownKeyError = Class.new(StandardError)
 
+  NO_DEFAULT = nil
+
   class StringSetting
 
-    def initialize(key, default: nil, required: default.nil?)
+    def initialize(key, default: NO_DEFAULT)
       @key = key
       @default = default
-      @required = required
     end
 
     def extract(env)
-      if @required
+      if @default == NO_DEFAULT
         unless env.has_key?(@key)
           raise MissingSettingError, "#{@key} must be set"
         end
@@ -26,8 +27,9 @@ module EnvSettings
 
   class BooleanSetting
 
-    def initialize(key, default: false, required: false)
-      @string = StringSetting.new(key, default: default ? "yes" : "", required: required)
+    def initialize(key, default: NO_DEFAULT)
+      default = default == NO_DEFAULT ? NO_DEFAULT : (default ? "yes" : "")
+      @string = StringSetting.new(key, default: default)
     end
 
     def extract(env)
@@ -38,24 +40,28 @@ module EnvSettings
 
   class ListSetting
 
-    def initialize(key, default: [], delimiter: /\s*,\s*/, required: false)
-      @string = StringSetting.new(key, default: "", required: required)
+    def initialize(key, default: NO_DEFAULT, delimiter: /\s*,\s*/)
       @default = default
+      @string = StringSetting.new(key, default: default == NO_DEFAULT ? NO_DEFAULT : "")
       @delimiter = delimiter
     end
 
     def extract(env)
       value = @string.extract(env)
 
-      value.empty? ? @default : value.split(@delimiter)
+      if @default == NO_DEFAULT
+        value.split(@delimiter)
+      else
+        value.empty? ? @default : value.split(@delimiter)
+      end
     end
 
   end
 
   class CustomSetting
 
-    def initialize(key, required: false, &extract_proc)
-      @string = StringSetting.new(key, required: required)
+    def initialize(key, &extract_proc)
+      @string = StringSetting.new(key)
       @extract_proc = extract_proc
     end
 

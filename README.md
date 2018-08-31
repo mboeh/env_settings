@@ -87,18 +87,19 @@ Full example:
 
 ```ruby
 fake_env = {
-
+  "FOO_NAME" => "Margo McGee",
+  "FOO_EMAIL" => "margo@example.com",
+  "FOO_ENABLED" => "on",
+  "FOO_SUPER_MODE" => "",
+  "FOO_IDEAS" => "good, bad, kinda okay",
+  "FOO_POWER_LEVELS" => "1:2:4:8",
 }
-# FIXME: I actually think 'required' is redundant with 'default' now.
 settings = EnvSettings.new do |e|
   e.string "FOO_NAME"
   e.string "FOO_EMAIL"
-  # Strings are required by default...
-  e.string "FOO_DESCRIPTION", required: false
-  # ... unless a default value is provided.
+  # Settings are required by default unless a default value is provided.
   e.string "FOO_TYPE", default: "frob"
   e.boolean "FOO_ENABLED"
-  # Booleans have `default: false` by default.
   e.boolean "FOO_SUPER_MODE", default: true
   e.list "FOO_IDEAS"
   e.list "FOO_ZONES", default: %w[left right up down]

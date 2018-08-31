@@ -26,7 +26,7 @@ RSpec.describe EnvSettings do
 
   context 'string vars' do
 
-    context 'if required' do
+    context 'if no default is provided' do
 
       it 'raises an error if missing' do
         expect{
@@ -47,7 +47,7 @@ RSpec.describe EnvSettings do
 
     end
 
-    context 'if not required' do
+    context 'if a default is provided' do
 
       it 'returns the default value if missing' do
         settings = described_class.extract({
@@ -90,19 +90,19 @@ RSpec.describe EnvSettings do
       expect(settings["FOO"]).to eq(false)
     end
 
-    context 'if required' do
+    context 'if no default is provided' do
 
       it 'raises an error if missing' do
         expect{
           described_class.extract(empty_env) { |s|
-            s.boolean "FOO", required: true
+            s.boolean "FOO"
           }
         }.to raise_error(EnvSettings::MissingSettingError)
       end
 
     end
 
-    context 'if not required' do
+    context 'if a default is provided' do
 
       it 'returns the default value if missing' do
         settings = described_class.extract({
@@ -154,19 +154,19 @@ RSpec.describe EnvSettings do
       expect(settings["FOO"]).to eq(%w[a b c d])
     end
 
-    context 'if required' do
+    context 'if no default is provided' do
 
       it 'raises an error if missing' do
         expect{
           described_class.extract(empty_env) { |s|
-            s.list "FOO", required: true
+            s.list "FOO"
           }
         }.to raise_error(EnvSettings::MissingSettingError)
       end
 
     end
 
-    context 'if not required' do
+    context 'if a default is provided' do
 
       it 'returns the default value if missing' do
         settings = described_class.extract({
