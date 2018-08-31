@@ -86,6 +86,9 @@ end
 Full example:
 
 ```ruby
+require 'pp'
+require 'env_settings'
+
 fake_env = {
   "FOO_NAME" => "Margo McGee",
   "FOO_EMAIL" => "margo@example.com",
@@ -107,5 +110,16 @@ settings = EnvSettings.extract(fake_env) do |e|
     v.nil? ? [] : v.split(":").map(&:to_i).sort
   end
 end
+pp settings.to_h
+
+
+#{"FOO_NAME"=>"Margo McGee",
+#  "FOO_EMAIL"=>"margo@example.com",
+#  "FOO_TYPE"=>"frob",
+#  "FOO_ENABLED"=>true,
+#  "FOO_SUPER_MODE"=>false,
+#  "FOO_IDEAS"=>["good", "bad", "kinda okay"],
+#  "FOO_ZONES"=>["left", "right", "up", "down"],
+#  "FOO_POWER_LEVELS"=>[1, 2, 4, 8]}
 ```
 

@@ -87,6 +87,12 @@ module EnvSettings
       @hash.each(&blk)
     end
 
+    def to_h
+      @hash.each_with_object({}) do |(k, v), h|
+        h[k.dup] = v.dup
+      end
+    end
+
   end
 
   class Builder
