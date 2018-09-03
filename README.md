@@ -74,7 +74,7 @@ stuff a hash or JSON or something into an environment variable, you can use the
 Drop-in for ENV:
 
 ```ruby
-ENV_SETTINGS = EnvSettings.extract do |e|
+ENV_SETTINGS = EnvSettings.load do |e|
   e.string "SETTING_NAME"
   e.string "OTHER_SETTING_NAME", default: "good"
 end
@@ -97,7 +97,7 @@ fake_env = {
   "FOO_IDEAS" => "good, bad, kinda okay",
   "FOO_POWER_LEVELS" => "1:2:4:8",
 }
-settings = EnvSettings.extract(fake_env) do |e|
+settings = EnvSettings.load(fake_env) do |e|
   e.string "FOO_NAME"
   e.string "FOO_EMAIL"
   # Settings are required by default unless a default value is provided.

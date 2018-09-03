@@ -122,7 +122,7 @@ module EnvSettings
       @settings[key] = CustomSetting.new(key, *args, &blk)
     end
 
-    def extract(env)
+    def load(env)
       Settings.new(
         @settings.each_with_object({}) do |(key, setting), extracted|
           extracted[key] = setting.extract(env)
@@ -136,8 +136,8 @@ module EnvSettings
     Builder.new(&decl_block)
   end
 
-  def self.extract(env = ENV, &decl_block)
-    declare(&decl_block).extract(env)
+  def self.load(env = ENV, &decl_block)
+    declare(&decl_block).load(env)
   end
 
 end

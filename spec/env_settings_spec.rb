@@ -1,188 +1,192 @@
 RSpec.describe EnvSettings do
   let(:empty_env) { {} }
 
-  def extract(env, &blk)
-    described_class.extract(env, &blk)
-  end
+  context '.load' do
 
-  context 'empty config' do
-
-    it 'raises no error' do
-      expect{
-        described_class.extract(empty_env) {}
-      }.not_to raise_error
+    def load(env, &blk)
+      described_class.load(env, &blk)
     end
 
-    it 'raises an error if you access a nonexistent setting' do
-      settings = described_class.extract({
-        "FOO" => "bar"
-      }) {}
-      expect{
-        settings["FOO"]
-      }.to raise_error(EnvSettings::UnknownKeyError)
-    end
+    context 'empty config' do
 
-  end
-
-  context 'string vars' do
-
-    context 'if no default is provided' do
-
-      it 'raises an error if missing' do
+      it 'raises no error' do
         expect{
-          described_class.extract(empty_env) { |s|
+          described_class.load(empty_env) {}
+        }.not_to raise_error
+      end
+
+      it 'raises an error if you access a nonexistent setting' do
+        settings = described_class.load({
+          "FOO" => "bar"
+        }) {}
+        expect{
+          settings["FOO"]
+        }.to raise_error(EnvSettings::UnknownKeyError)
+      end
+
+    end
+
+    context 'string vars' do
+
+      context 'if no default is provided' do
+
+        it 'raises an error if missing' do
+          expect{
+            described_class.load(empty_env) { |s|
+              s.string "FOO"
+            }
+          }.to raise_error(EnvSettings::MissingSettingError)
+        end
+
+        it 'returns the provided value if present' do
+          settings = described_class.load({
+            "FOO" => "bar"
+          }) { |s|
             s.string "FOO"
           }
-        }.to raise_error(EnvSettings::MissingSettingError)
+          expect(settings["FOO"]).to eq("bar")
+        end
+
       end
 
-      it 'returns the provided value if present' do
-        settings = described_class.extract({
-          "FOO" => "bar"
-        }) { |s|
-          s.string "FOO"
-        }
-        expect(settings["FOO"]).to eq("bar")
-      end
+      context 'if a default is provided' do
 
-    end
-
-    context 'if a default is provided' do
-
-      it 'returns the default value if missing' do
-        settings = described_class.extract({
-        }) { |s|
-          s.string "FOO", default: "bar"
-        }
-        expect(settings["FOO"]).to eq("bar")
-      end
-
-      it 'returns the provided value if present' do
-        settings = described_class.extract({
-          "FOO" => "bar"
-        }) { |s|
-          s.string "FOO", default: "not bar"
-        }
-        expect(settings["FOO"]).to eq("bar")
-      end
-
-    end
-
-  end
-
-  context 'boolean vars' do
-
-    it 'interprets any non-blank string as true' do
-      settings = described_class.extract({
-        "FOO" => "bar"
-      }) { |s|
-        s.boolean "FOO"
-      }
-      expect(settings["FOO"]).to eq(true)
-    end
-
-    it 'interprets any non-blank string as true' do
-      settings = described_class.extract({
-        "FOO" => ""
-      }) { |s|
-        s.boolean "FOO"
-      }
-      expect(settings["FOO"]).to eq(false)
-    end
-
-    context 'if no default is provided' do
-
-      it 'raises an error if missing' do
-        expect{
-          described_class.extract(empty_env) { |s|
-            s.boolean "FOO"
+        it 'returns the default value if missing' do
+          settings = described_class.load({
+          }) { |s|
+            s.string "FOO", default: "bar"
           }
-        }.to raise_error(EnvSettings::MissingSettingError)
+          expect(settings["FOO"]).to eq("bar")
+        end
+
+        it 'returns the provided value if present' do
+          settings = described_class.load({
+            "FOO" => "bar"
+          }) { |s|
+            s.string "FOO", default: "not bar"
+          }
+          expect(settings["FOO"]).to eq("bar")
+        end
+
       end
 
     end
 
-    context 'if a default is provided' do
+    context 'boolean vars' do
 
-      it 'returns the default value if missing' do
-        settings = described_class.extract({
+      it 'interprets any non-blank string as true' do
+        settings = described_class.load({
+          "FOO" => "bar"
         }) { |s|
-          s.boolean "FOO", default: true
+          s.boolean "FOO"
         }
         expect(settings["FOO"]).to eq(true)
       end
 
-      it 'returns the provided value if present' do
-        settings = described_class.extract({
+      it 'interprets any non-blank string as true' do
+        settings = described_class.load({
           "FOO" => ""
         }) { |s|
-          s.boolean "FOO", default: true
+          s.boolean "FOO"
         }
         expect(settings["FOO"]).to eq(false)
       end
 
-    end
+      context 'if no default is provided' do
 
-  end
+        it 'raises an error if missing' do
+          expect{
+            described_class.load(empty_env) { |s|
+              s.boolean "FOO"
+            }
+          }.to raise_error(EnvSettings::MissingSettingError)
+        end
 
-  context 'list vars' do
+      end
 
-    it 'interprets a blank string as an empty list' do
-      settings = described_class.extract({
-        "FOO" => ""
-      }) { |s|
-        s.list "FOO"
-      }
-      expect(settings["FOO"]).to eq([])
-    end
+      context 'if a default is provided' do
 
-    it 'splits a non-blank string on whitespace-surrounded commas' do
-      settings = described_class.extract({
-        "FOO" => "foo, bar, baz  , bat"
-      }) { |s|
-        s.list "FOO"
-      }
-      expect(settings["FOO"]).to eq(%w[foo bar baz bat])
-    end
-
-    it 'splits a non-blank string on a provided delimiter' do
-      settings = described_class.extract({
-        "FOO" => "a:b:c:d"
-      }) { |s|
-        s.list "FOO", delimiter: /:/
-      }
-      expect(settings["FOO"]).to eq(%w[a b c d])
-    end
-
-    context 'if no default is provided' do
-
-      it 'raises an error if missing' do
-        expect{
-          described_class.extract(empty_env) { |s|
-            s.list "FOO"
+        it 'returns the default value if missing' do
+          settings = described_class.load({
+          }) { |s|
+            s.boolean "FOO", default: true
           }
-        }.to raise_error(EnvSettings::MissingSettingError)
+          expect(settings["FOO"]).to eq(true)
+        end
+
+        it 'returns the provided value if present' do
+          settings = described_class.load({
+            "FOO" => ""
+          }) { |s|
+            s.boolean "FOO", default: true
+          }
+          expect(settings["FOO"]).to eq(false)
+        end
+
       end
 
     end
 
-    context 'if a default is provided' do
+    context 'list vars' do
 
-      it 'returns the default value if missing' do
-        settings = described_class.extract({
+      it 'interprets a blank string as an empty list' do
+        settings = described_class.load({
+          "FOO" => ""
         }) { |s|
-          s.list "FOO", default: %w[foo bar]
+          s.list "FOO"
         }
-        expect(settings["FOO"]).to eq(%w[foo bar])
+        expect(settings["FOO"]).to eq([])
       end
 
-      it 'returns the provided value if present' do
-        settings = described_class.extract({
-          "FOO" => "foo, bar"
+      it 'splits a non-blank string on whitespace-surrounded commas' do
+        settings = described_class.load({
+          "FOO" => "foo, bar, baz  , bat"
         }) { |s|
-          s.list "FOO", default: %w[baz bat]
+          s.list "FOO"
         }
-        expect(settings["FOO"]).to eq(%w[foo bar])
+        expect(settings["FOO"]).to eq(%w[foo bar baz bat])
+      end
+
+      it 'splits a non-blank string on a provided delimiter' do
+        settings = described_class.load({
+          "FOO" => "a:b:c:d"
+        }) { |s|
+          s.list "FOO", delimiter: /:/
+        }
+        expect(settings["FOO"]).to eq(%w[a b c d])
+      end
+
+      context 'if no default is provided' do
+
+        it 'raises an error if missing' do
+          expect{
+            described_class.load(empty_env) { |s|
+              s.list "FOO"
+            }
+          }.to raise_error(EnvSettings::MissingSettingError)
+        end
+
+      end
+
+      context 'if a default is provided' do
+
+        it 'returns the default value if missing' do
+          settings = described_class.load({
+          }) { |s|
+            s.list "FOO", default: %w[foo bar]
+          }
+          expect(settings["FOO"]).to eq(%w[foo bar])
+        end
+
+        it 'returns the provided value if present' do
+          settings = described_class.load({
+            "FOO" => "foo, bar"
+          }) { |s|
+            s.list "FOO", default: %w[baz bat]
+          }
+          expect(settings["FOO"]).to eq(%w[foo bar])
+        end
+
       end
 
     end
