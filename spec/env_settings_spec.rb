@@ -72,6 +72,55 @@ RSpec.describe EnvSettings do
 
     end
 
+    context 'number vars' do
+
+      context 'if no default is provided' do
+
+        it 'raises an error if missing' do
+          expect{
+            described_class.load(empty_env) { |s|
+              s.number "FOO"
+            }
+          }.to raise_error(EnvSettings::MissingSettingError)
+        end
+
+        it 'returns the provided value if present' do
+          settings = described_class.load({
+            "FOO" => "1",
+            "BAR" => "1.1234",
+          }) { |s|
+            s.number "FOO"
+            s.number "BAR"
+          }
+          expect(settings["FOO"]).to eq(1)
+          expect(settings["BAR"]).to eq(1.1234)
+        end
+
+      end
+
+      context 'if a default is provided' do
+
+        it 'returns the default value if missing' do
+          settings = described_class.load({
+          }) { |s|
+            s.number "FOO", default: 1234
+          }
+          expect(settings["FOO"]).to eq(1234)
+        end
+
+        it 'returns the provided value if present' do
+          settings = described_class.load({
+            "FOO" => 1010
+          }) { |s|
+            s.number "FOO", default: 1234 
+          }
+          expect(settings["FOO"]).to eq(1010)
+        end
+
+      end
+
+    end
+
     context 'boolean vars' do
 
       it 'interprets any non-blank string as true' do
@@ -204,6 +253,8 @@ RSpec.describe EnvSettings do
         "FOO_NAME" => "Margo McGee",
         "FOO_EMAIL" => "margo@example.com",
         "FOO_ENABLED" => "on",
+        "FOO_COUNT" => "5",
+        "FOO_RATIO" => "0.75",
         "FOO_SUPER_MODE" => "",
         "FOO_IDEAS" => "good, bad, kinda okay",
         "FOO_POWER_LEVELS" => "1:2:4:8",
@@ -213,6 +264,8 @@ RSpec.describe EnvSettings do
           name: e.string("FOO_NAME"),
           email: e.string("FOO_EMAIL"),
           type: e.string("FOO_TYPE", default: "frob"),
+          count: e.number("FOO_COUNT"),
+          ratio: e.number("FOO_RATIO"),
           enabled: e.boolean("FOO_ENABLED"),
           super_mode: e.boolean("FOO_SUPER_MODE", default: true),
           ideas: e.list("FOO_IDEAS"),
@@ -226,6 +279,8 @@ RSpec.describe EnvSettings do
         name: "Margo McGee",
         email: "margo@example.com",
         type: "frob",
+        count: 5,
+        ratio: 0.75,
         enabled: true,
         super_mode: false,
         ideas: %w[good bad kinda\ okay],

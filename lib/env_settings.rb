@@ -38,6 +38,24 @@ module EnvSettings
 
   end
 
+  class NumberSetting
+
+    def initialize(key, default: NO_DEFAULT)
+      default = default == NO_DEFAULT ? NO_DEFAULT : default.to_s
+      @string = StringSetting.new(key, default: default)
+    end
+
+    def extract(env)
+      value = @string.extract(env)
+      if value =~ /\./
+        value.to_f
+      else
+        value.to_i
+      end
+    end
+
+  end
+
   class ListSetting
 
     def initialize(key, default: NO_DEFAULT, delimiter: /\s*,\s*/)
@@ -107,6 +125,11 @@ module EnvSettings
       @settings[key] = StringSetting.new(key, *args)
     end
 
+    def number(key, *args)
+      key = key.to_s
+      @settings[key] = NumberSetting.new(key, *args)
+    end
+
     def boolean(key, *args)
       key = key.to_s
       @settings[key] = BooleanSetting.new(key, *args)
@@ -141,6 +164,11 @@ module EnvSettings
     def string(key, *args)
       key = key.to_s
       StringSetting.new(key, *args).extract(env)
+    end
+
+    def number(key, *args)
+      key = key.to_s
+      NumberSetting.new(key, *args).extract(env)
     end
 
     def boolean(key, *args)

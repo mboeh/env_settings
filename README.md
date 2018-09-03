@@ -110,6 +110,7 @@ fake_env = {
   "FOO_EMAIL" => "margo@example.com",
   "FOO_ENABLED" => "on",
   "FOO_SUPER_MODE" => "",
+  "FOO_COUNT" => "5",
   "FOO_IDEAS" => "good, bad, kinda okay",
   "FOO_POWER_LEVELS" => "1:2:4:8",
 }
@@ -118,6 +119,8 @@ settings = EnvSettings.load(fake_env) do |e|
   e.string "FOO_EMAIL"
   # Settings are required by default unless a default value is provided.
   e.string "FOO_TYPE", default: "frob"
+  e.number "FOO_COUNT"
+  e.number "FOO_RATIO", default: 0.5
   e.boolean "FOO_ENABLED"
   e.boolean "FOO_SUPER_MODE", default: true
   e.list "FOO_IDEAS"
@@ -132,6 +135,8 @@ pp settings.to_h
 #{"FOO_NAME"=>"Margo McGee",
 #  "FOO_EMAIL"=>"margo@example.com",
 #  "FOO_TYPE"=>"frob",
+#  "FOO_COUNT"=>5,
+#  "FOO_RATIO"=>0.5,
 #  "FOO_ENABLED"=>true,
 #  "FOO_SUPER_MODE"=>false,
 #  "FOO_IDEAS"=>["good", "bad", "kinda okay"],
