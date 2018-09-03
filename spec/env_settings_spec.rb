@@ -193,4 +193,47 @@ RSpec.describe EnvSettings do
 
   end
 
+  context '.extract' do
+
+    def extract(env, &blk)
+      described_class.extract(env, &blk)
+    end
+
+    it 'allows piecemeal sampling of ENV' do
+      env = {
+        "FOO_NAME" => "Margo McGee",
+        "FOO_EMAIL" => "margo@example.com",
+        "FOO_ENABLED" => "on",
+        "FOO_SUPER_MODE" => "",
+        "FOO_IDEAS" => "good, bad, kinda okay",
+        "FOO_POWER_LEVELS" => "1:2:4:8",
+      }
+      extracted = extract(env) do |e|
+        {
+          name: e.string("FOO_NAME"),
+          email: e.string("FOO_EMAIL"),
+          type: e.string("FOO_TYPE", default: "frob"),
+          enabled: e.boolean("FOO_ENABLED"),
+          super_mode: e.boolean("FOO_SUPER_MODE", default: true),
+          ideas: e.list("FOO_IDEAS"),
+          zones: e.list("FOO_ZONES", default: %w[left right up down]),
+          power_levels: e.custom("FOO_POWER_LEVELS") do |v|
+            v.nil? ? [] : v.split(":").map(&:to_i).sort
+          end,
+        }
+      end
+      expect(extracted).to eq({
+        name: "Margo McGee",
+        email: "margo@example.com",
+        type: "frob",
+        enabled: true,
+        super_mode: false,
+        ideas: %w[good bad kinda\ okay],
+        zones: %w[left right up down],
+        power_levels: [1, 2, 4, 8],
+      })
+    end
+
+  end
+
 end

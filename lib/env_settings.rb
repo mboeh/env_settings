@@ -132,12 +132,48 @@ module EnvSettings
 
   end
 
+  class Extractor
+
+    def initialize(env)
+      @env = env
+    end
+
+    def string(key, *args)
+      key = key.to_s
+      StringSetting.new(key, *args).extract(env)
+    end
+
+    def boolean(key, *args)
+      key = key.to_s
+      BooleanSetting.new(key, *args).extract(env)
+    end
+
+    def list(key, *args)
+      key = key.to_s
+      ListSetting.new(key, *args).extract(env)
+    end
+
+    def custom(key, *args, &blk)
+      key = key.to_s
+      CustomSetting.new(key, *args, &blk).extract(env)
+    end
+
+    private
+
+    attr_reader :env
+
+  end
+
   def self.declare(&decl_block)
     Builder.new(&decl_block)
   end
 
   def self.load(env = ENV, &decl_block)
     declare(&decl_block).load(env)
+  end
+
+  def self.extract(env = ENV, &extract_block)
+    yield Extractor.new(env)
   end
 
 end

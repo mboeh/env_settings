@@ -83,6 +83,22 @@ end
 # exception will be raised.
 ```
 
+Piecemeal extraction:
+
+```ruby
+FooClient.api_credentials = EnvSettings.extract do |e|
+  {
+    username: e.string("FOO_API_USERNAME"),
+    password: e.string("FOO_API_PASSWORD"),
+  }
+end
+
+EnvSettings.extract do |e|
+  CoolFeature.enabled = e.boolean("FEATURE_COOL_ENABLED", default: false)
+  WeirdFeature.enabled = e.boolean("FEATURE_WEIRD_ENABLED", default: false)
+end
+```
+
 Full example:
 
 ```ruby
