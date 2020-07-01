@@ -1,5 +1,7 @@
 # EnvSettings
 
+![Tests](https://github.com/mboeh/env_settings/workflows/Tests/badge.svg)
+
 This gem provides simple validation and parsing of `ENV`-based application
 settings for Ruby. Using `ENV` directly in application code is simple and easy,
 but it has unexpected pitfalls.
